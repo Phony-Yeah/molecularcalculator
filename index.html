@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Молекулярний калькулятор</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #FDF6F0;
+            --bg2: #F7EDE4;
+            --fg: #4A4063;
+            --fg-light: #7B7194;
+            --accent: #E8998D;
+            --accent2: #D4A5A5;
+            --card: rgba(255,255,255,0.7);
+            --border: rgba(74,64,99,0.1);
+            --shadow: rgba(74,64,99,0.08);
+            --alkali: #F8C8C8;
+            --alkaline: #FADCAA;
+            --transition: #C8D8F0;
+            --post-transition: #C8E8D8;
+            --metalloid: #D8F0C8;
+            --nonmetal: #F0ECC8;
+            --halogen: #D8C8F0;
+            --noble: #E8C8F0;
+            --lanthanide: #C8F0E8;
+            --actinide: #F0D8C8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Фонові блоби */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+            animation: blobFloat 20s ease-in-out infinite;
+        }
+        .blob-1 { width: 400px; height: 400px; background: #F8C8C8; top: -100px; left: -100px; }
+        .blob-2 { width: 350px; height: 350px; background: #C8D8F0; top: 30%; right: -80px; animation-delay: -7s; }
+        .blob-3 { width: 300px; height: 300px; background: #D8F0C8; bottom: 10%; left: 20%; animation-delay: -14s; }
+        .blob-4 { width: 250px; height: 250px; background: #E8C8F0; bottom: -50px; right: 30%; animation-delay: -3s; }
+
+        @keyframes blobFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -20px) scale(1.05); }
+            50% { transform: translate(-20px, 30px) scale(0.95); }
+            75% { transform: translate(20px, 20px) scale(1.02); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px 60px;
+        }
+
+        /* Заголовок */
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        header h1 {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            color: var(--fg);
+            letter-spacing: -0.5px;
+        }
+        header h1 span {
+            color: var(--accent);
+        }
+        header p {
+            color: var(--fg-light);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        /* Калькулятор */
+        .calc-section {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 32px var(--shadow);
+        }
+        .calc-row {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+        .calc-input-wrap {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+        .calc-input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--fg-light);
+            font-size: 0.9rem;
+        }
+        .calc-input {
+            width: 100%;
+            padding: 14px 16px 14px 42px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.6);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--fg);
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .calc-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(232,153,141,0.15);
+        }
+        .calc-input::placeholder {
+            color: var(--fg-light);
+            opacity: 0.5;
+            font-weight: 400;
+        }
+        .calc-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232,153,141,0.35);
+        }
+        .calc-btn:active { transform: translateY(0); }
+        .calc-btn.secondary {
+            background: rgba(74,64,99,0.08);
+            color: var(--fg-light);
+        }
+        .calc-btn.secondary:hover {
+            background: rgba(74,64,99,0.14);
+            box-shadow: none;
+        }
+
+        /* Швидкі формули */
+        .quick-formulas {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .quick-formulas span {
+            font-size: 0.82rem;
+            color: var(--fg-light);
+            font-weight: 600;
+        }
+        .quick-chip {
+            padding: 5px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255,255,255,0.5);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--fg);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .quick-chip:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        /* Результат */
+        .result-area {
+            margin-top: 16px;
+            min-height: 0;
+            overflow: hidden;
+            transition: min-height 0.4s ease;
+        }
+        .result-card {
+            background: linear-gradient(135deg, rgba(232,153,141,0.1), rgba(200,216,240,0.1));
+            border: 1px solid rgba(232,153,141,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            animation: resultIn 0.4s ease;
+        }
+        @keyframes resultIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-mass {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .result-mass small {
+            font-size: 0.9rem;
+            color: var(--fg-light);
+            font-weight: 400;
+        }
+        .result-breakdown {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .result-tag {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .result-tag .tag-symbol {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .error-msg {
+            color: #D46A6A;
+            font-weight: 600;
+            font-size: 0.9rem;
+            animation: resultIn 0.3s ease;
+        }
+
+        /* Таблиця Менделєєва */
+        .table-section {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px var(--shadow);
+            overflow-x: auto;
+        }
+        .table-section h2 {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--fg);
+        }
+        .ptable {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(52px, 1fr));
+            gap: 3px;
+            min-width: 960px;
+        }
+        .el-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            position: relative;
+            overflow: hidden;
+            border: 1.5px solid transparent;
+        }
+        .el-cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            opacity: 0;
+            background: rgba(255,255,255,0.5);
+            transition: opacity 0.2s;
+        }
+        .el-cell:hover::before { opacity: 1; }
+        .el-cell:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px var(--shadow);
+            z-index: 5;
+            border-color: rgba(74,64,99,0.15);
+        }
+        .el-cell:active { transform: scale(1.05); }
+        .el-cell.highlighted {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 2px rgba(232,153,141,0.3);
+        }
+        .el-cell.dimmed { opacity: 0.35; }
+
+        .el-number {
+            font-size: 0.55rem;
+            font-weight: 600;
+            opacity: 0.6;
+            line-height: 1;
+        }
+        .el-symbol {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .el-mass {
+            font-size: 0.45rem;
+            opacity: 0.55;
+            line-height: 1;
+        }
+
+        /* Маркери лантаноїдів/актинойдів */
+        .marker-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.48rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.1;
+            cursor: default;
+            padding: 2px;
+        }
+        .marker-lan { background: var(--lanthanide); color: var(--fg); }
+        .marker-act { background: var(--actinide); color: var(--fg); }
+
+        /* Легенда */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            color: var(--fg-light);
+            font-weight: 600;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Модальне вікно */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(74,64,99,0.25);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 0;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(74,64,99,0.15);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+        .modal-header {
+            padding: 28px 28px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        .modal-symbol-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .modal-big-symbol {
+            width: 72px;
+            height: 72px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--fg);
+        }
+        .modal-title-group h2 {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--fg);
+            line-height: 1.2;
+        }
+        .modal-title-group .modal-category {
+            font-size: 0.78rem;
+            color: var(--fg-light);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(74,64,99,0.06);
+            color: var(--fg-light);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .modal-close:hover {
+            background: rgba(74,64,99,0.12);
+            color: var(--fg);
+        }
+        .modal-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 20px 28px;
+        }
+        .modal-stat {
+            background: rgba(74,64,99,0.03);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .modal-stat-label {
+            font-size: 0.68rem;
+            color: var(--fg-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .modal-stat-value {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--fg);
+            margin-top: 2px;
+        }
+        .modal-info {
+            padding: 0 28px 24px;
+        }
+        .modal-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-info-row:last-child { border-bottom: none; }
+        .modal-info-label {
+            font-size: 0.8rem;
+            color: var(--fg-light);
+            font-weight: 600;
+        }
+        .modal-info-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--fg);
+            text-align: right;
+        }
+        .modal-add-btn {
+            margin: 0 28px 24px;
+            width: calc(100% - 56px);
+            padding: 12px;
+            border: 2px dashed var(--accent);
+            border-radius: 14px;
+            background: rgba(232,153,141,0.06);
+            color: var(--accent);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-add-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-style: solid;
+        }
+
+        /* Тост */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--fg);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            box-shadow: 0 8px 30px rgba(74,64,99,0.25);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Підказка таблиці */
+        .table-hint {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--fg-light);
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+
+        /* Адаптивність */
+        @media (max-width: 768px) {
+            .container { padding: 16px 10px 40px; }
+            .calc-section { padding: 18px; }
+            .calc-row { flex-direction: column; }
+            .calc-btn { width: 100%; }
+            .modal { max-width: 100%; }
+            .modal-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .blob, .el-cell, .modal, .modal-overlay, .result-card, .toast {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* Скролбар */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(74,64,99,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(74,64,99,0.25); }
+    </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="blob blob-4"></div>
+
+<div class="container">
+    <header>
+        <h1>Молекулярний <span>калькулятор</span></h1>
+        <p>Розрахуйте молекулярну масу сполуки та дізнайтеся про кожен елемент</p>
+    </header>
+
+    <!-- Калькулятор -->
+    <section class="calc-section">
+        <div class="calc-row">
+            <div class="calc-input-wrap">
+                <i class="fa-solid fa-flask"></i>
+                <input type="text" class="calc-input" id="formulaInput" placeholder="Введіть формулу, наприклад H2O, Ca(OH)2" autocomplete="off" spellcheck="false">
+            </div>
+            <button class="calc-btn" onclick="calculate()">
+                <i class="fa-solid fa-calculator"></i>&nbsp; Розрахувати
+            </button>
+            <button class="calc-btn secondary" onclick="clearFormula()">
+                <i class="fa-solid fa-eraser"></i>&nbsp; Очистити
+            </button>
+        </div>
+        <div class="quick-formulas">
+            <span>Швидко:</span>
+            <button class="quick-chip" onclick="setFormula('H2O')">H<sub>2</sub>O</button>
+            <button class="quick-chip" onclick="setFormula('NaCl')">NaCl</button>
+            <button class="quick-chip" onclick="setFormula('Ca(OH)2')">Ca(OH)<sub>2</sub></button>
+            <button class="quick-chip" onclick="setFormula('C6H12O6')">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></button>
+            <button class="quick-chip" onclick="setFormula('H2SO4')">H<sub>2</sub>SO<sub>4</sub></button>
+            <button class="quick-chip" onclick="setFormula('Al2(SO4)3')">Al<sub>2</sub>(SO<sub>4</sub>)<sub>3</sub></button>
+            <button class="quick-chip" onclick="setFormula('Fe2O3')">Fe<sub>2</sub>O<sub>3</sub></button>
+            <button class="quick-chip" onclick="setFormula('CH3COOH')">CH<sub>3</sub>COOH</button>
+            <button class="quick-chip" onclick="setFormula('C2H5OH')">C<sub>2</sub>H<sub>5</sub>OH</button>
+            <button class="quick-chip" onclick="setFormula('KMnO4')">KMnO<sub>4</sub></button>
+        </div>
+        <div class="result-area" id="resultArea"></div>
+    </section>
+
+    <!-- Таблиця Менделєєва -->
+    <section class="table-section">
+        <h2><i class="fa-solid fa-table-cells"></i>&nbsp; Таблиця Менделєєва</h2>
+        <div class="ptable" id="ptable"></div>
+        <div class="legend" id="legend"></div>
+        <p class="table-hint">Натисніть на елемент, щоб дізнатися про нього більше та додати до формули</p>
+    </section>
+</div>
+
+<!-- Модальне вікно -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Тост -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================
+// ДАНІ ПРО ВСІ 118 ЕЛЕМЕНТИ
+// Формат: [символ, назваUA, маса, категорія, період, група, рядок, колонка, конфігурація, густина, т.плавл., т.кип., рік, відкривач]
+// =====================================================
+const ELEMENTS_RAW = [
+[1,"H","Гідроген",1.008,"nonmetal",1,1,1,1,"1s¹",0.00009,-259.16,-252.87,1766,"Кавендіш"],
+[2,"He","Гелій",4.003,"noble",1,18,1,18,"1s²",0.000164,-272.2,-268.93,1868,"Лок'єр / Жансен"],
+[3,"Li","Літій",6.941,"alkali",2,1,2,1,"[He]2s¹",0.534,180.54,1342,1817,"Арфведсон"],
+[4,"Be","Берилій",9.012,"alkaline",2,2,2,2,"[He]2s²",1.85,1287,2469,1798,"Вокелен"],
+[5,"B","Бор",10.81,"metalloid",2,13,2,13,"[He]2s²2p¹",2.34,2076,3927,1808,"Гей-Люссак / Тенар"],
+[6,"C","Вуглець",12.011,"nonmetal",2,14,2,14,"[He]2s²2p²",2.267,3550,4027,"---","---"],
+[7,"N","Нітроген",14.007,"nonmetal",2,15,2,15,"[He]2s²2p³",0.00125,-210.0,-195.79,1772,"Резерфорд"],
+[8,"O","Оксиген",15.999,"nonmetal",2,16,2,16,"[He]2s²2p⁴",0.00143,-218.79,-182.96,1774,"Пристлі / Шеєле"],
+[9,"F","Флуор",18.998,"halogen",2,17,2,17,"[He]2s²2p⁵",0.0017,-219.67,-188.11,1886,"Муассан"],
+[10,"Ne","Неон",20.18,"noble",2,18,2,18,"[He]2s²2p⁶",0.0009,-248.59,-246.05,1898,"Рамзі / Траверс"],
+[11,"Na","Натрій",22.99,"alkali",3,1,3,1,"[Ne]3s¹",0.971,97.72,883,1807,"Деві"],
+[12,"Mg","Магній",24.305,"alkaline",3,2,3,2,"[Ne]3s²",1.738,650,1090,1755,"Блек"],
+[13,"Al","Алюміній",26.982,"post-transition",3,13,3,13,"[Ne]3s²3p¹",2.698,660.32,2519,1825,"Ерстед"],
+[14,"Si","Кремній",28.086,"metalloid",3,14,3,14,"[Ne]3s²3p²",2.3296,1414,3265,1824,"Берцеліус"],
+[15,"P","Фосфор",30.974,"nonmetal",3,15,3,15,"[Ne]3s²3p³",1.82,44.15,280.5,1669,"Бранд"],
+[16,"S","Сірка",32.065,"nonmetal",3,16,3,16,"[Ne]3s²3p⁴",2.067,115.21,444.6,"---","---"],
+[17,"Cl","Хлор",35.453,"halogen",3,17,3,17,"[Ne]3s²3p⁵",0.0032,-101.5,-34.04,1774,"Шеєле"],
+[18,"Ar","Аргон",39.948,"noble",3,18,3,18,"[Ne]3s²3p⁶",0.0018,-189.34,-185.85,1894,"Рамзі / Релей"],
+[19,"K","Калій",39.098,"alkali",4,1,4,1,"[Ar]4s¹",0.862,63.38,759,1807,"Деві"],
+[20,"Ca","Кальцій",40.078,"alkaline",4,2,4,2,"[Ar]4s²",1.55,842,1484,1808,"Деві"],
+[21,"Sc","Скандій",44.956,"transition",4,3,4,3,"[Ar]3d¹4s²",2.989,1541,2836,1879,"Нільсон"],
+[22,"Ti","Титан",47.867,"transition",4,4,4,4,"[Ar]3d²4s²",4.54,1668,3287,1791,"Грегор"],
+[23,"V","Ванадій",50.942,"transition",4,5,4,5,"[Ar]3d³4s²",6.11,1910,3407,1801,"дель Ріо"],
+[24,"Cr","Хром",51.996,"transition",4,6,4,6,"[Ar]3d⁵4s¹",7.15,1907,2671,1797,"Вокелен"],
+[25,"Mn","Манган",54.938,"transition",4,7,4,7,"[Ar]3d⁵4s²",7.44,1246,2061,1774,"Ган"],
+[26,"Fe","Залізо",55.845,"transition",4,8,4,8,"[Ar]3d⁶4s²",7.874,1538,2861,"---","---"],
+[27,"Co","Кобальт",58.933,"transition",4,9,4,9,"[Ar]3d⁷4s²",8.9,1495,2927,1735,"Брандт"],
+[28,"Ni","Нікель",58.693,"transition",4,10,4,10,"[Ar]3d⁸4s²",8.912,1455,2913,1751,"Кронштедт"],
+[29,"Cu","Мідь",63.546,"transition",4,11,4,11,"[Ar]3d¹⁰4s¹",8.96,1084.62,2562,"---","---"],
+[30,"Zn","Цинк",65.38,"transition",4,12,4,12,"[Ar]3d¹⁰4s²",7.134,419.53,907,1746,"---"],
+[31,"Ga","Галій",69.723,"post-transition",4,13,4,13,"[Ar]3d¹⁰4s²4p¹",5.907,29.76,2204,1875,"Лекок де Буабодран"],
+[32,"Ge","Германій",72.63,"metalloid",4,14,4,14,"[Ar]3d¹⁰4s²4p²",5.323,938.25,2833,1886,"Вінклер"],
+[33,"As","Арсен",74.922,"metalloid",4,15,4,15,"[Ar]3d¹⁰4s²4p³",5.776,817,614,"---","---"],
+[34,"Se","Селен",78.96,"nonmetal",4,16,4,16,"[Ar]3d¹⁰4s²4p⁴",4.809,221,685,1817,"Берцеліус"],
+[35,"Br","Бром",79.904,"halogen",4,17,4,17,"[Ar]3d¹⁰4s²4p⁵",3.122,-7.2,58.8,1826,"Балар"],
+[36,"Kr","Криптон",83.798,"noble",4,18,4,18,"[Ar]3d¹⁰4s²4p⁶",0.00375,-157.36,-153.22,1898,"Рамзі / Траверс"],
+[37,"Rb","Рубидій",85.468,"alkali",5,1,5,1,"[Kr]5s¹",1.532,39.31,688,1861,"Бунзен / Кірхгоф"],
+[38,"Sr","Стронцій",87.62,"alkaline",5,2,5,2,"[Kr]5s²",2.64,777,1382,1790,"Кроуфорд"],
+[39,"Y","Ітрій",88.906,"transition",5,3,5,3,"[Kr]4d¹5s²",4.469,1526,3345,1794,"Гадолін"],
+[40,"Zr","Цирконій",91.224,"transition",5,4,5,4,"[Kr]4d²5s²",6.506,1855,4409,1789,"Клапрот"],
+[41,"Nb","Ніобій",92.906,"transition",5,5,5,5,"[Kr]4d⁴5s¹",8.57,2477,4744,1801,"Гетчєтт"],
+[42,"Mo","Молібден",95.95,"transition",5,6,5,6,"[Kr]4d⁵5s¹",10.22,2623,4639,1781,"Гельм"],
+[43,"Tc","Технецій",98,"transition",5,7,5,7,"[Kr]4d⁵5s²",11.5,2157,4265,1937,"Пер'єр / Сегре"],
+[44,"Ru","Рутеній",101.07,"transition",5,8,5,8,"[Kr]4d⁷5s¹",12.37,2334,4150,1844,"Клаус"],
+[45,"Rh","Родій",102.906,"transition",5,9,5,9,"[Kr]4d⁸5s¹",12.41,1964,3695,1803,"Воластон"],
+[46,"Pd","Паладій",106.42,"transition",5,10,5,10,"[Kr]4d¹⁰",12.02,1554.9,2963,1803,"Воластон"],
+[47,"Ag","Срібло",107.868,"transition",5,11,5,11,"[Kr]4d¹⁰5s¹",10.501,961.78,2162,"---","---"],
+[48,"Cd","Кадмій",112.411,"transition",5,12,5,12,"[Kr]4d¹⁰5s²",8.69,321.07,767,1817,"Штромаєр"],
+[49,"In","Індій",114.818,"post-transition",5,13,5,13,"[Kr]4d¹⁰5s²5p¹",7.31,156.6,2072,1863,"Рейх / Ріхтер"],
+[50,"Sn","Олово",118.71,"post-transition",5,14,5,14,"[Kr]4d¹⁰5s²5p²",7.287,231.93,2602,"---","---"],
+[51,"Sb","Сурма",121.76,"metalloid",5,15,5,15,"[Kr]4d¹⁰5s²5p³",6.685,630.63,1587,"---","---"],
+[52,"Te","Телур",127.6,"metalloid",5,16,5,16,"[Kr]4d¹⁰5s²5p⁴",6.232,449.51,988,1783,"Мюллер фон Рейхенштайн"],
+[53,"I","Йод",126.904,"halogen",5,17,5,17,"[Kr]4d¹⁰5s²5p⁵",4.93,113.7,184.3,1811,"Куртуа"],
+[54,"Xe","Ксенон",131.293,"noble",5,18,5,18,"[Kr]4d¹⁰5s²5p⁶",0.0059,-111.75,-108.09,1898,"Рамзі / Траверс"],
+[55,"Cs","Цезій",132.905,"alkali",6,1,6,1,"[Xe]6s¹",1.873,28.44,671,1860,"Бунзен / Кірхгоф"],
+[56,"Ba","Барій",137.327,"alkaline",6,2,6,2,"[Xe]6s²",3.594,727,1845,1808,"Деві"],
+[57,"La","Лантан",138.905,"lanthanide",6,3,9,3,"[Xe]5d¹6s²",6.145,920,3464,1839,"Мозандер"],
+[58,"Ce","Церій",140.116,"lanthanide",6,3,9,4,"[Xe]4f¹5d¹6s²",6.77,799,3443,1803,"Берцеліус / Гізінгер"],
+[59,"Pr","Празеодим",140.908,"lanthanide",6,3,9,5,"[Xe]4f³6s²",6.773,931,3520,1885,"Вельсбах"],
+[60,"Nd","Неодим",144.242,"lanthanide",6,3,9,6,"[Xe]4f⁴6s²",7.008,1016,3074,1885,"Вельсбах"],
+[61,"Pm","Прометій",145,"lanthanide",6,3,9,7,"[Xe]4f⁵6s²",7.26,1042,3000,1945,"Марінський / Гленденін"],
+[62,"Sm","Самарій",150.36,"lanthanide",6,3,9,8,"[Xe]4f⁶6s²",7.52,1074,1794,1879,"Лекок де Буабодран"],
+[63,"Eu","Європій",151.964,"lanthanide",6,3,9,9,"[Xe]4f⁷6s²",5.243,822,1529,1901,"Демарсе"],
+[64,"Gd","Гадоліній",157.25,"lanthanide",6,3,9,10,"[Xe]4f⁷5d¹6s²",7.895,1313,3273,1880,"Маріньяк"],
+[65,"Tb","Тербій",158.925,"lanthanide",6,3,9,11,"[Xe]4f⁹6s²",8.229,1356,3230,1843,"Мозандер"],
+[66,"Dy","Диспрозій",162.5,"lanthanide",6,3,9,12,"[Xe]4f¹⁰6s²",8.55,1412,2567,1886,"Лекок де Буабодран"],
+[67,"Ho","Гольмій",164.93,"lanthanide",6,3,9,13,"[Xe]4f¹¹6s²",8.795,1474,2700,1878,"Сор"],
+[68,"Er","Ербій",167.259,"lanthanide",6,3,9,14,"[Xe]4f¹²6s²",9.066,1529,2868,1842,"Мозандер"],
+[69,"Tm","Тулій",168.934,"lanthanide",6,3,9,15,"[Xe]4f¹³6s²",9.321,1545,1950,1879,"Клеве"],
+[70,"Yb","Ітербій",173.045,"lanthanide",6,3,9,16,"[Xe]4f¹⁴6s²",6.965,819,1196,1878,"Маріньяк"],
+[71,"Lu","Лютецій",174.967,"lanthanide",6,3,9,17,"[Xe]4f¹⁴5d¹6s²",9.84,1663,3402,1907,"Урбен"],
+[72,"Hf","Гафній",178.49,"transition",6,4,6,4,"[Xe]4f¹⁴5d²6s²",13.31,2233,4603,1923,"Костер / Гевеші"],
+[73,"Ta","Тантал",180.948,"transition",6,5,6,5,"[Xe]4f¹⁴5d³6s²",16.654,3017,5458,1802,"Екеберг"],
+[74,"W","Вольфрам",183.84,"transition",6,6,6,6,"[Xe]4f¹⁴5d⁴6s²",19.25,3422,5555,1783,"Ельуйяр"],
+[75,"Re","Реній",186.207,"transition",6,7,6,7,"[Xe]4f¹⁴5d⁵6s²",21.02,3186,5596,1925,"Ноддак / Такке / Берг"],
+[76,"Os","Осмій",190.23,"transition",6,8,6,8,"[Xe]4f¹⁴5d⁶6s²",22.59,3033,5012,1803,"Теннант"],
+[77,"Ir","Іридій",192.217,"transition",6,9,6,9,"[Xe]4f¹⁴5d⁷6s²",22.56,2446,4428,1803,"Теннант"],
+[78,"Pt","Платина",195.084,"transition",6,10,6,10,"[Xe]4f¹⁴5d⁹6s¹",21.46,1768.3,3825,"---","---"],
+[79,"Au","Золото",196.967,"transition",6,11,6,11,"[Xe]4f¹⁴5d¹⁰6s¹",19.282,1064.18,2856,"---","---"],
+[80,"Hg","Ртуть",200.59,"transition",6,12,6,12,"[Xe]4f¹⁴5d¹⁰6s²",13.5336,-38.83,356.73,"---","---"],
+[81,"Tl","Талій",204.383,"post-transition",6,13,6,13,"[Xe]4f¹⁴5d¹⁰6s²6p¹",11.85,304,1473,1861,"Крукс"],
+[82,"Pb","Свинець",207.2,"post-transition",6,14,6,14,"[Xe]4f¹⁴5d¹⁰6s²6p²",11.342,327.46,1749,"---","---"],
+[83,"Bi","Вісмут",208.98,"post-transition",6,15,6,15,"[Xe]4f¹⁴5d¹⁰6s²6p³",9.807,271.5,1564,"---","---"],
+[84,"Po","Полоній",209,"post-transition",6,16,6,16,"[Xe]4f¹⁴5d¹⁰6s²6p⁴",9.32,254,962,1898,"Кюрі"],
+[85,"At","Астат",210,"halogen",6,17,6,17,"[Xe]4f¹⁴5d¹⁰6s²6p⁵","---","---","---",1940,"Корсон / Макензі / Сегре"],
+[86,"Rn","Радон",222,"noble",6,18,6,18,"[Xe]4f¹⁴5d¹⁰6s²6p⁶","---","---","---",1900,"Дорн"],
+[87,"Fr","Францій",223,"alkali",7,1,7,1,"[Rn]7s¹","---","---","---",1939,"Перей"],
+[88,"Ra","Радій",226,"alkaline",7,2,7,2,"[Rn]7s²",5.5,700,1737,1898,"Кюрі"],
+[89,"Ac","Актиній",227,"actinide",7,3,10,3,"[Rn]6d¹7s²",10.07,1050,3198,1899,"Деб'єрн"],
+[90,"Th","Торій",232.038,"actinide",7,3,10,4,"[Rn]6d²7s²",11.72,1750,4788,1829,"Берцеліус"],
+[91,"Pa","Протактиній",231.036,"actinide",7,3,10,5,"[Rn]5f²6d¹7s²",15.37,1572,4027,1913,"Фаянс / Гőрінг"],
+[92,"U","Уран",238.029,"actinide",7,3,10,6,"[Rn]5f³6d¹7s²",19.1,1135,4131,1789,"Клапрот"],
+[93,"Np","Нептуній",237,"actinide",7,3,10,7,"[Rn]5f⁴6d¹7s²",20.45,644,3902,1940,"Макміллан / Абельсон"],
+[94,"Pu","Плутоній",244,"actinide",7,3,10,8,"[Rn]5f⁶7s²",19.82,640,3228,1940,"Сіборг / Кеннеді / Валь / Макміллан"],
+[95,"Am","Америцій",243,"actinide",7,3,10,9,"[Rn]5f⁷7s²",12,1176,2011,1944,"Сіборг / Джеймс / Морган / Гіорзо"],
+[96,"Cm","Кюрій",247,"actinide",7,3,10,10,"[Rn]5f⁷6d¹7s²",13.51,1345,3110,1944,"Сіборг / Джеймс / Гіорзо"],
+[97,"Bk","Берклій",247,"actinide",7,3,10,11,"[Rn]5f⁹7s²",14.79,1050,"---",1949,"Томпсон / Гіорзо / Сіборг"],
+[98,"Cf","Каліфорній",251,"actinide",7,3,10,12,"[Rn]5f¹⁰7s²",15.1,900,"---",1950,"Томпсон / Стріт / Гіорзо / Сіборг"],
+[99,"Es","Ейнштейній",252,"actinide",7,3,10,13,"[Rn]5f¹¹7s²",8.84,860,"---",1952,"Гіорзо та ін."],
+[100,"Fm","Фермій",257,"actinide",7,3,10,14,"[Rn]5f¹²7s²","---","---","---",1952,"Гіорзо та ін."],
+[101,"Md","Менделевій",258,"actinide",7,3,10,15,"[Rn]5f¹³7s²","---","---","---",1955,"Гіорзо / Харві / Чопін / Томпсон / Сіборг"],
+[102,"No","Нобелій",259,"actinide",7,3,10,16,"[Rn]5f¹⁴7s²","---","---","---",1966,"Гіорзо та ін."],
+[103,"Lr","Лоуренсій",266,"actinide",7,3,10,17,"[Rn]5f¹⁴7s²7p¹","---","---","---",1961,"Гіорзо / Сікорланд / Ларш / Латмер"],
+[104,"Rf","Резерфордій",267,"transition",7,4,7,4,"[Rn]5f¹⁴6d²7s²","---","---","---",1964,"Флєров та ін."],
+[105,"Db","Дубній",268,"transition",7,5,7,5,"[Rn]5f¹⁴6d³7s²","---","---","---",1967,"Флєров та ін."],
+[106,"Sg","Сіборгій",269,"transition",7,6,7,6,"[Rn]5f¹⁴6d⁴7s²","---","---","---",1974,"Гіорзо / Нішіна та ін."],
+[107,"Bh","Борій",270,"transition",7,7,7,7,"[Rn]5f¹⁴6d⁵7s²","---","---","---",1981,"Мюнценберг та ін."],
+[108,"Hs","Гасій",277,"transition",7,8,7,8,"[Rn]5f¹⁴6d⁶7s²","---","---","---",1984,"Мюнценберг та ін."],
+[109,"Mt","Майтнерій",278,"transition",7,9,7,9,"[Rn]5f¹⁴6d⁷7s²","---","---","---",1982,"Мюнценберг та ін."],
+[110,"Ds","Дармштадтій",281,"transition",7,10,7,10,"[Rn]5f¹⁴6d⁸7s²","---","---","---",1994,"Хофман / Мюнценберг та ін."],
+[111,"Rg","Рентгеній",282,"transition",7,11,7,11,"[Rn]5f¹⁴6d⁹7s²","---","---","---",1994,"Хофман / Мюнценберг та ін."],
+[112,"Cn","Коперницій",285,"transition",7,12,7,12,"[Rn]5f¹⁴6d¹⁰7s²","---","---","---",1996,"Хофман / Мюнценберг та ін."],
+[113,"Nh","Ніхоній",286,"post-transition",7,13,7,13,"[Rn]5f¹⁴6d¹⁰7s²7p¹","---","---","---",2003,"Моріта та ін."],
+[114,"Fl","Флеровій",289,"post-transition",7,14,7,14,"[Rn]5f¹⁴6d¹⁰7s²7p²","---","---","---",1999,"Оганесьян та ін."],
+[115,"Mc","Московій",290,"post-transition",7,15,7,15,"[Rn]5f¹⁴6d¹⁰7s²7p³","---","---","---",2003,"Оганесьян та ін."],
+[116,"Lv","Ливерморій",293,"post-transition",7,16,7,16,"[Rn]5f¹⁴6d¹⁰7s²7p⁴","---","---","---",2000,"Оганесьян та ін."],
+[117,"Ts","Теннессин",294,"halogen",7,17,7,17,"[Rn]5f¹⁴6d¹⁰7s²7p⁵","---","---","---",2010,"Оганесьян та ін."],
+[118,"Og","Оганесон",294,"noble",7,18,7,18,"[Rn]5f¹⁴6d¹⁰7s²7p⁶","---","---","---",2002,"Оганесьян та ін."]
+];
+
+// Перетворення в зручний об'єкт
+const elements = {};
+ELEMENTS_RAW.forEach(d => {
+    elements[d[1]] = {
+        number: d[0],
+        symbol: d[1],
+        name: d[2],
+        mass: d[3],
+        category: d[4],
+        period: d[5],
+        group: d[6],
+        row: d[7],
+        col: d[8],
+        config: d[9],
+        density: d[10],
+        meltPoint: d[11],
+        boilPoint: d[12],
+        discYear: d[13],
+        discoverer: d[14]
+    };
+});
+
+// Кольори категорій
+const CATEGORY_COLORS = {
+    "alkali": "var(--alkali)",
+    "alkaline": "var(--alkaline)",
+    "transition": "var(--transition)",
+    "post-transition": "var(--post-transition)",
+    "metalloid": "var(--metalloid)",
+    "nonmetal": "var(--nonmetal)",
+    "halogen": "var(--halogen)",
+    "noble": "var(--noble)",
+    "lanthanide": "var(--lanthanide)",
+    "actinide": "var(--actinide)"
+};
+
+const CATEGORY_NAMES = {
+    "alkali": "Лужні метали",
+    "alkaline": "Лужноземельні метали",
+    "transition": "Перехідні метали",
+    "post-transition": "Постперехідні метали",
+    "metalloid": "Металоїди",
+    "nonmetal": "Неметали",
+    "halogen": "Галогени",
+    "noble": "Інертні гази",
+    "lanthanide": "Лантаноїди",
+    "actinide": "Актинойди"
+};
+
+// =====================================================
+// ПОБУДОВА ТАБЛИЦІ МЕНДЕЛЄЄВА
+// =====================================================
+function buildTable() {
+    const table = document.getElementById('ptable');
+    // 10 рядків × 18 колонок
+    for (let r = 1; r <= 10; r++) {
+        for (let c = 1; c <= 18; c++) {
+            // Знайти елемент на цій позиції
+            let found = null;
+            for (const sym in elements) {
+                if (elements[sym].row === r && elements[sym].col === c) {
+                    found = elements[sym];
+                    break;
+                }
+            }
+
+            if (found) {
+                const cell = document.createElement('div');
+                cell.className = 'el-cell';
+                cell.dataset.symbol = found.symbol;
+                cell.style.background = CATEGORY_COLORS[found.category];
+                cell.innerHTML = `
+                    <span class="el-number">${found.number}</span>
+                    <span class="el-symbol">${found.symbol}</span>
+                    <span class="el-mass">${found.mass}</span>
+                `;
+                cell.addEventListener('click', () => openModal(found.symbol));
+                cell.setAttribute('role', 'button');
+                cell.setAttribute('aria-label', `${found.name} (${found.symbol}), атомна маса ${found.mass}`);
+                cell.setAttribute('tabindex', '0');
+                cell.addEventListener('keydown', (e) => { if (e.key === 'Enter') openModal(found.symbol); });
+                table.appendChild(cell);
+            } else if (r === 6 && c === 3) {
+                // Маркер лантаноїдів
+                const m = document.createElement('div');
+                m.className = 'marker-cell marker-lan';
+                m.innerHTML = '57-71<br>La-Lu';
+                table.appendChild(m);
+            } else if (r === 7 && c === 3) {
+                // Маркер актинойдів
+                const m = document.createElement('div');
+                m.className = 'marker-cell marker-act';
+                m.innerHTML = '89-103<br>Ac-Lr';
+                table.appendChild(m);
+            } else {
+                // Порожня клітинка
+                const empty = document.createElement('div');
+                table.appendChild(empty);
+            }
+        }
+    }
+
+    // Легенда
+    const legend = document.getElementById('legend');
+    for (const cat in CATEGORY_NAMES) {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `<div class="legend-dot" style="background:${CATEGORY_COLORS[cat]}"></div>${CATEGORY_NAMES[cat]}`;
+        legend.appendChild(item);
+    }
+}
+
+// =====================================================
+// ПАРСЕР ХІМІЧНИХ ФОРМУЛ
+// =====================================================
+function parseFormula(str) {
+    let i = 0;
+
+    function parse() {
+        const result = {};
+        while (i < str.length && str[i] !== ')') {
+            if (str[i] === '(') {
+                i++; // пропускаємо '('
+                const inner = parse();
+                if (i < str.length && str[i] === ')') i++; // пропускаємо ')'
+                const num = parseNumber();
+                for (const el in inner) {
+                    result[el] = (result[el] || 0) + inner[el] * num;
+                }
+            } else if (/[A-Z]/.test(str[i])) {
+                let symbol = str[i++];
+                while (i < str.length && /[a-z]/.test(str[i])) {
+                    symbol += str[i++];
+                }
+                const num = parseNumber();
+                result[symbol] = (result[symbol] || 0) + num;
+            } else {
+                i++; // пропускаємо невідомі символи
+            }
+        }
+        return result;
+    }
+
+    function parseNumber() {
+        let numStr = '';
+        while (i < str.length && /\d/.test(str[i])) {
+            numStr += str[i++];
+        }
+        return numStr ? parseInt(numStr, 10) : 1;
+    }
+
+    return parse();
+}
+
+// =====================================================
+// РОЗРАХУНОК МОЛЕКУЛЯРНОЇ МАСИ
+// =====================================================
+function calculate() {
+    const input = document.getElementById('formulaInput').value.trim();
+    const resultArea = document.getElementById('resultArea');
+
+    if (!input) {
+        resultArea.innerHTML = '<div class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> Введіть хімічну формулу</div>';
+        highlightElements([]);
+        return;
+    }
+
+    // Перевірка на допустимі символи
+    if (!/^[A-Za-z()0-9]+$/.test(input)) {
+        resultArea.innerHTML = '<div class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> Формула містить недопустимі символи</div>';
+        highlightElements([]);
+        return;
+    }
+
+    const parsed = parseFormula(input);
+    const symbols = Object.keys(parsed);
+
+    if (symbols.length === 0) {
+        resultArea.innerHTML = '<div class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> Не вдалося розпізнати формулу</div>';
+        highlightElements([]);
+        return;
+    }
+
+    // Перевірка чи всі елементи існують
+    let unknown = [];
+    for (const sym of symbols) {
+        if (!elements[sym]) unknown.push(sym);
+    }
+
+    if (unknown.length > 0) {
+        resultArea.innerHTML = `<div class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> Невідомі елементи: ${unknown.join(', ')}</div>`;
+        highlightElements([]);
+        return;
+    }
+
+    // Розрахунок
+    let totalMass = 0;
+    const breakdown = [];
+    for (const sym of symbols) {
+        const count = parsed[sym];
+        const el = elements[sym];
+        const contribution = el.mass * count;
+        totalMass += contribution;
+        breakdown.push({ symbol: sym, name: el.name, count, mass: el.mass, contribution, category: el.category });
+    }
+
+    // Сортування за масою (спадання)
+    breakdown.sort((a, b) => b.contribution - a.contribution);
+
+    // Побудова результату
+    let tagsHtml = breakdown.map(b => {
+        const color = CATEGORY_COLORS[b.category];
+        return `<div class="result-tag" style="background:${color}">
+            <span class="tag-symbol">${b.symbol}</span>
+            <span>${b.count > 1 ? '&times;' + b.count : ''}</span>
+            <span>= ${b.contribution.toFixed(3)}</span>
+        </div>`;
+    }).join('');
+
+    resultArea.innerHTML = `
+        <div class="result-card">
+            <div class="result-mass">${totalMass.toFixed(3)} <small>г/моль</small></div>
+            <div class="result-breakdown">${tagsHtml}</div>
+        </div>
+    `;
+
+    highlightElements(symbols);
+}
+
+// =====================================================
+// ПІДСВІТКА ЕЛЕМЕНТІВ У ТАБЛИЦІ
+// =====================================================
+function highlightElements(symbols) {
+    document.querySelectorAll('.el-cell').forEach(cell => {
+        cell.classList.remove('highlighted', 'dimmed');
+    });
+    if (symbols.length > 0) {
+        document.querySelectorAll('.el-cell').forEach(cell => {
+            if (symbols.includes(cell.dataset.symbol)) {
+                cell.classList.add('highlighted');
+            } else {
+                cell.classList.add('dimmed');
+            }
+        });
+    }
+}
+
+// =====================================================
+// МОДАЛЬНЕ ВІКНО З ІНФОРМАЦІЄЮ ПРО ЕЛЕМЕНТ
+// =====================================================
+function openModal(symbol) {
+    const el = elements[symbol];
+    if (!el) return;
+
+    const color = CATEGORY_COLORS[el.category];
+    const catName = CATEGORY_NAMES[el.category] || el.category;
+
+    const fmtDensity = typeof el.density === 'number' ? el.density + ' г/см³' : (el.density || '—');
+    const fmtMelt = typeof el.meltPoint === 'number' ? el.meltPoint + ' °C' : (el.meltPoint || '—');
+    const fmtBoil = typeof el.boilPoint === 'number' ? el.boilPoint + ' °C' : (el.boilPoint || '—');
+    const fmtYear = el.discYear === '---' ? 'Давні_times_' : el.discYear || '—';
+    const fmtDiscoverer = el.discoverer === '---' ? 'Відомий з давніх_часів' : (el.discoverer || '—');
+
+    const modal = document.getElementById('modalContent');
+    modal.innerHTML = `
+        <div class="modal-header">
+            <div class="modal-symbol-wrap">
+                <div class="modal-big-symbol" style="background:${color}">${el.symbol}</div>
+                <div class="modal-title-group">
+                    <h2>${el.name}</h2>
+                    <div class="modal-category">${catName}</div>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal()" aria-label="Закрити"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-stats">
+            <div class="modal-stat">
+                <div class="modal-stat-label">Атомний номер</div>
+                <div class="modal-stat-value">${el.number}</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-label">Атомна маса</div>
+                <div class="modal-stat-value">${el.mass} г/моль</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-label">Період</div>
+                <div class="modal-stat-value">${el.period}</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-label">Група</div>
+                <div class="modal-stat-value">${el.group}</div>
+            </div>
+        </div>
+        <div class="modal-info">
+            <div class="modal-info-row">
+                <span class="modal-info-label">Електронна конфігурація</span>
+                <span class="modal-info-value">${el.config}</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Густина</span>
+                <span class="modal-info-value">${fmtDensity}</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Точка плавлення</span>
+                <span class="modal-info-value">${fmtMelt}</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Точка кипіння</span>
+                <span class="modal-info-value">${fmtBoil}</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Рік відкриття</span>
+                <span class="modal-info-value">${fmtYear}</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Відкривач</span>
+                <span class="modal-info-value">${fmtDiscoverer}</span>
+            </div>
+        </div>
+        <button class="modal-add-btn" onclick="addToFormula('${el.symbol}')">
+            <i class="fa-solid fa-plus"></i>&nbsp; Додати ${el.symbol} до формули
+        </button>
+    `;
+
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function closeModalOutside(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// Закриття по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// =====================================================
+// ДОДАТИ ЕЛЕМЕНТ ДО ФОРМУЛИ
+// =====================================================
+function addToFormula(symbol) {
+    const input = document.getElementById('formulaInput');
+    const pos = input.selectionStart || input.value.length;
+    const before = input.value.substring(0, pos);
+    const after = input.value.substring(pos);
+    input.value = before + symbol + after;
+    input.focus();
+    input.setSelectionRange(pos + symbol.length, pos + symbol.length);
+    closeModal();
+    showToast(`${symbol} додано до формули`);
+}
+
+// =====================================================
+// ДОПОМІЖНІ ФУНКЦІЇ
+// =====================================================
+function setFormula(formula) {
+    document.getElementById('formulaInput').value = formula;
+    calculate();
+}
+
+function clearFormula() {
+    document.getElementById('formulaInput').value = '';
+    document.getElementById('resultArea').innerHTML = '';
+    highlightElements([]);
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Обчислення при Enter
+document.getElementById('formulaInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') calculate();
+});
+
+// Живе підсвічування при вводі
+document.getElementById('formulaInput').addEventListener('input', () => {
+    const val = document.getElementById('formulaInput').value.trim();
+    if (!val) {
+        highlightElements([]);
+        return;
+    }
+    if (/^[A-Za-z()0-9]+$/.test(val)) {
+        const parsed = parseFormula(val);
+        const syms = Object.keys(parsed).filter(s => elements[s]);
+        if (syms.length > 0) highlightElements(syms);
+        else highlightElements([]);
+    }
+});
+
+// =====================================================
+// ІНІЦІАЛІЗАЦІЯ
+// =====================================================
+buildTable();
+</script>
+</body>
+</html>
